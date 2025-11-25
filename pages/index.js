@@ -1,78 +1,82 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import React from 'react';
+import { useTheme } from '../context/ThemeContext';
+import HeroSection from '../components/home/HeroSection';
+import TechStackSection from '../components/home/TechStackSection';
+import AboutSection from '../components/home/AboutSection';
+import FeaturedWork from '../components/home/FeaturedWork';
+import LatestExperience from '../components/home/LatestExperience';
+import CertificationsSection from '../components/home/CertificationsSection';
+import { fetchFromApi, parseDate } from '../lib/api';
+import SEO from '../components/SEO';
+import { ArticleJsonLd } from 'next-seo';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+export default function Home({ skills, projects, experiences, certifications, resumeUrl }) {
+  const { darkMode } = useTheme();
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export default function Home() {
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="max-w-4xl mx-auto animate-fade-in">
+      <SEO
+        title="Home"
+        description="Dive into the diverse portfolio of Diptayan Jash, a proficient web and app developer with a strong academic background. With expertise in languages like Java, C, C++, Python, JavaScript, TypeScript, and databases like Firebase and MongoDB, he excels in server-side development."
+      />
+      <ArticleJsonLd
+        useAppDir={false}
+        url="https://www.djdiptayan.in/"
+        title="Diptayan Jash | Web Developer & Portfolio"
+        images={[
+          'https://www.djdiptayan.in/dj.png'
+        ]}
+        datePublished="2024-01-01T08:00:00+08:00"
+        dateModified={new Date().toISOString()}
+        authorName={[
+          {
+            name: 'Diptayan Jash',
+            url: 'https://www.djdiptayan.in',
+          },
+        ]}
+        publisherName="Diptayan Jash"
+        publisherLogo="https://www.djdiptayan.in/dj.png"
+        description="Diptayan Jash is a proficient web and app developer with expertise in React, Next.js, Node.js, and more."
+      />
+      <HeroSection resumeUrl={resumeUrl} />
+      <TechStackSection skills={skills} />
+      <AboutSection />
+      <FeaturedWork projects={projects} />
+      <LatestExperience experiences={experiences} />
+      <CertificationsSection certifications={certifications} />
+      <div className={`w-full h-px ${darkMode ? 'bg-white/10' : 'bg-stone-200'}`}></div>
     </div>
   );
+}
+
+export async function getStaticProps() {
+  const [skills, projects, experiences, certifications, socials] = await Promise.all([
+    fetchFromApi('/skills'),
+    fetchFromApi('/projects'),
+    fetchFromApi('/experiences'),
+    fetchFromApi('/certifications'),
+    fetchFromApi('/socials')
+  ]);
+
+  // Sort experiences
+  const sortedExp = experiences.sort((a, b) => {
+    const endA = parseDate(a.date?.end);
+    const endB = parseDate(b.date?.end);
+    return endB - endA;
+  });
+
+  // Extract resume URL
+  const resumeSocial = socials.find(s => s.name.toLowerCase() === 'resume');
+  const resumeUrl = resumeSocial ? (resumeSocial.url || resumeSocial["  url"] || resumeSocial[" url"]) : "https://drive.google.com/file/d/1NCvtmOL3SIrex8ti8QusJqL4zjUAszUG/view?usp=drive_link";
+
+  return {
+    props: {
+      skills,
+      projects,
+      experiences: sortedExp,
+      certifications,
+      resumeUrl
+    },
+    revalidate: 60
+  };
 }
