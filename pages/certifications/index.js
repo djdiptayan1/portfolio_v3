@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { ExternalLink } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import PaperCard from '../../components/ui/PaperCard';
@@ -14,7 +15,13 @@ export default function Certifications({ certifications }) {
                 {certifications.map((cert) => (
                     <PaperCard key={cert._id} hoverEffect={true} className="p-6 flex gap-6 items-start">
                         {cert.image && (
-                            <img src={cert.image} alt={cert.title} className="w-20 h-20 object-contain rounded-md bg-white/5 p-2" />
+                            <Image
+                                src={cert.image}
+                                alt={cert.title}
+                                width={80}
+                                height={80}
+                                className="object-contain rounded-md bg-white/5 p-2"
+                            />
                         )}
                         <div className="flex-1 min-w-0">
                             <h4 className={`text-lg font-medium font-serif leading-tight mb-2 ${darkMode ? 'text-stone-200' : 'text-stone-800'}`}>

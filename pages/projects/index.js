@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Github, ExternalLink } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import PaperCard from '../../components/ui/PaperCard';
@@ -21,10 +22,12 @@ export default function Projects({ projects }) {
                     <PaperCard key={project._id} className="flex flex-col h-full group">
                         <div className="h-48 overflow-hidden relative border-b border-gray-100/10">
                             {project.coverImage ? (
-                                <img
+                                <Image
                                     src={project.coverImage}
                                     alt={project.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                             ) : (
                                 <div className={`w-full h-full flex items-center justify-center ${darkMode ? 'bg-stone-800' : 'bg-stone-100'}`}>
