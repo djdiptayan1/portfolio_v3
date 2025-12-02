@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Github, ExternalLink } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -6,9 +6,22 @@ import PaperCard from '../../components/ui/PaperCard';
 import Badge from '../../components/ui/Badge';
 import { fetchFromApi } from '../../lib/api';
 import SEO from '../../components/SEO';
+import ProjectModal from '../../components/ProjectModal';
 
 export default function Projects({ projects }) {
     const { darkMode } = useTheme();
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleProjectClick = (project) => {
+        setSelectedProject(project);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setTimeout(() => setSelectedProject(null), 300);
+    };
 
     return (
         <div className="max-w-6xl mx-auto animate-fade-in pt-10 pb-20">
@@ -19,7 +32,11 @@ export default function Projects({ projects }) {
             <h2 className={`text-5xl font-serif mb-16 ${darkMode ? 'text-stone-100' : 'text-stone-900'}`}>All Works</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {projects.map((project) => (
-                    <PaperCard key={project._id} className="flex flex-col h-full group">
+                    <PaperCard
+                        key={project._id}
+                        className="flex flex-col h-full group cursor-pointer"
+                        onClick={() => handleProjectClick(project)}
+                    >
                         <div className="h-48 overflow-hidden relative border-b border-gray-100/10">
                             {project.coverImage ? (
                                 <Image
@@ -37,21 +54,23 @@ export default function Projects({ projects }) {
                             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 {project.github && (
                                     <a href={project.github} target="_blank" rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
                                         className="p-2 bg-white text-black rounded-full shadow-lg hover:scale-110 transition-transform">
                                         <Github size={18} />
                                     </a>
                                 )}
                                 {project.website && (
                                     <a href={project.website} target="_blank" rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
                                         className="p-2 bg-black text-white rounded-full shadow-lg hover:scale-110 transition-transform">
                                         <ExternalLink size={18} />
                                     </a>
                                 )}
                             </div>
                         </div>
-                        <div className="p-6 flex flex-col flex-grow">
+                        <div className="p-6 flex flex-col grow">
                             <h3 className={`text-xl font-medium font-serif mb-2 ${darkMode ? 'text-stone-100' : 'text-stone-800'}`}>{project.title}</h3>
-                            <p className={`text-sm leading-relaxed mb-6 flex-grow line-clamp-3 ${darkMode ? 'text-stone-400' : 'text-stone-600'}`}>
+                            <p className={`text-sm leading-relaxed mb-6 grow line-clamp-3 ${darkMode ? 'text-stone-400' : 'text-stone-600'}`}>
                                 {project.description}
                             </p>
                             <div className="flex flex-wrap gap-2 mt-auto">
@@ -63,14 +82,21 @@ export default function Projects({ projects }) {
                     </PaperCard>
                 ))}
             </div>
+
+            <ProjectModal
+                project={selectedProject}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            />
         </div>
     );
 }
 
 export async function getStaticProps() {
+    // Backend already returns projects sorted with featured first
     const projects = await fetchFromApi('/projects');
     return {
-        props: { projects },
+        props: { projects: projects || [] },
         revalidate: 60
     };
 }

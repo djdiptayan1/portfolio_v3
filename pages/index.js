@@ -50,6 +50,7 @@ export default function Home({ skills, projects, experiences, certifications, re
 }
 
 export async function getStaticProps() {
+  // Fetch data from API - backend returns sorted data with featured items first
   const [skills, projects, experiences, certifications, socials] = await Promise.all([
     fetchFromApi('/skills'),
     fetchFromApi('/projects'),
@@ -58,23 +59,16 @@ export async function getStaticProps() {
     fetchFromApi('/socials')
   ]);
 
-  // Sort experiences
-  const sortedExp = experiences.sort((a, b) => {
-    const endA = parseDate(a.date?.end);
-    const endB = parseDate(b.date?.end);
-    return endB - endA;
-  });
-
-  // Extract resume URL
-  const resumeSocial = socials.find(s => s.name.toLowerCase() === 'resume');
-  const resumeUrl = resumeSocial ? (resumeSocial.url || resumeSocial["  url"] || resumeSocial[" url"]) : "https://drive.google.com/file/d/1NCvtmOL3SIrex8ti8QusJqL4zjUAszUG/view?usp=drive_link";
+  // Extract resume URL from socials
+  const resumeSocial = socials.find(s => s.name?.toLowerCase() === 'resume');
+  const resumeUrl = resumeSocial?.url;
 
   return {
     props: {
-      skills,
-      projects,
-      experiences: sortedExp,
-      certifications,
+      skills: skills || [],
+      projects: projects || [],
+      experiences: experiences || [],
+      certifications: certifications || [],
       resumeUrl
     },
     revalidate: 60

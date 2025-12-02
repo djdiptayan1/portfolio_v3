@@ -61,9 +61,10 @@ export default function Certifications({ certifications }) {
 }
 
 export async function getStaticProps() {
+    // Backend already returns certifications sorted with featured first
     const certifications = await fetchFromApi('/certifications');
     return {
-        props: { certifications },
+        props: { certifications: certifications || [] },
         revalidate: 60
     };
 }

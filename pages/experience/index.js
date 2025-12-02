@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapPin } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { fetchFromApi, parseDate } from '../../lib/api';
+import { fetchFromApi } from '../../lib/api';
 import SEO from '../../components/SEO';
 
 export default function Experience({ experiences }) {
@@ -40,15 +40,11 @@ export default function Experience({ experiences }) {
 }
 
 export async function getStaticProps() {
+    // Backend already returns experiences sorted by most recent first
     const experiences = await fetchFromApi('/experiences');
-    const sortedExp = experiences.sort((a, b) => {
-        const endA = parseDate(a.date?.end);
-        const endB = parseDate(b.date?.end);
-        return endB - endA;
-    });
 
     return {
-        props: { experiences: sortedExp },
+        props: { experiences: experiences || [] },
         revalidate: 60
     };
 }
